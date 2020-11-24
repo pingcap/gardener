@@ -16,6 +16,7 @@ package shoot
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/runtime"
 	"time"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -452,6 +453,9 @@ func (c *Controller) updateShootStatusReconcileSuccess(o *operation.Operation, o
 		func(shoot *gardencorev1beta1.Shoot) (*gardencorev1beta1.Shoot, error) {
 			shoot.Status.RetryCycleStartTime = nil
 			shoot.Status.SeedName = &o.Seed.Info.Name
+			shoot.Status.InfrastructureProviderStatus =  &runtime.RawExtension{
+				Raw: o.Shoot.InfrastructureStatus,
+			}
 			shoot.Status.IsHibernated = o.Shoot.HibernationEnabled
 			shoot.Status.LastErrors = nil
 			shoot.Status.LastOperation = &gardencorev1beta1.LastOperation{
