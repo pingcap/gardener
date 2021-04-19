@@ -64,6 +64,16 @@ func (b *Botanist) DeploySeedMonitoring(ctx context.Context) error {
 		return err
 	}
 
+	// Find extension monitoring configuration in garden namespace
+	gardenConfigMaps := &corev1.ConfigMapList{}
+	if err := b.K8sSeedClient.Client().List(ctx, gardenConfigMaps,
+		client.InNamespace("garden"),
+		client.MatchingLabels{v1beta1constants.LabelExtensionConfiguration: v1beta1constants.LabelMonitoring}); err != nil {
+		return err
+	}
+
+	existingConfigMaps.Items = append(existingConfigMaps.Items, gardenConfigMaps.Items...)
+
 	// Read extension monitoring configurations
 	for _, cm := range existingConfigMaps.Items {
 		alertingRules.WriteString(fmt.Sprintln(cm.Data[v1beta1constants.PrometheusConfigMapAlertingRules]))
@@ -142,6 +152,8 @@ func (b *Botanist) DeploySeedMonitoring(ctx context.Context) error {
 				"provider":  b.Shoot.Info.Spec.Provider.Type,
 				"name":      b.Shoot.Info.Name,
 				"project":   b.Garden.Project.Name,
+				// add tenant label to prometheus external label
+				"tenant": b.Shoot.Info.Labels["tenant"],
 			},
 			"ignoreAlerts": b.Shoot.IgnoreAlerts,
 			"alerting":     alerting,
