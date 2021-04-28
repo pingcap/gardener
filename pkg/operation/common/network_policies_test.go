@@ -61,4 +61,27 @@ var _ = Describe("networkpolicies", func() {
 			Expect(result).To(ConsistOf(expectedResult))
 		})
 	})
+
+	Describe("#ToExceptNetworks (k8s >= 1.18)", func() {
+		It("should totally exclude 192.168.0.0/16", func() {
+			result, err := ToExceptNetworks(AllPrivateNetworkBlocks(), "10.10.0.0/24", "172.16.1.0/24", "192.168.0.0/16", "100.64.1.0/24")
+			expectedResult := []interface{}{
+				map[string]interface{}{
+					"network": "10.0.0.0/8",
+					"except":  []string{"10.10.0.0/24"},
+				},
+				map[string]interface{}{
+					"network": "172.16.0.0/12",
+					"except":  []string{"172.16.1.0/24"},
+				},
+				map[string]interface{}{
+					"network": "100.64.0.0/10",
+					"except":  []string{"100.64.1.0/24"},
+				},
+			}
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result).To(ConsistOf(expectedResult))
+		})
+	})
 })

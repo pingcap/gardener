@@ -66,11 +66,14 @@ func ToExceptNetworks(networks []net.IPNet, except ...string) ([]interface{}, er
 	result := []interface{}{}
 
 	for _, n := range networks {
-		excluded, err := excludeBlock(&n, except...)
+		excluded, skipParent, err := excludeBlock(&n, except...)
 		if err != nil {
 			return nil, err
 		}
-
+		// this network should be total ignored
+		if skipParent {
+			continue
+		}
 		result = append(result, map[string]interface{}{
 			"network": n.String(),
 			"except":  excluded,
@@ -102,17 +105,30 @@ func ExceptNetworks(networks []string, except ...string) ([]interface{}, error) 
 	return ToExceptNetworks(ipNets, except...)
 }
 
-func excludeBlock(parentBlock *net.IPNet, cidrs ...string) ([]string, error) {
+// excludeBlock excludes the pod, service and node cidrs from the private network,
+// returns the subnets to exclude and whether the whole parentBlock should be exclude
+func excludeBlock(parentBlock *net.IPNet, cidrs ...string) ([]string, bool, error) {
 	matchedCIDRs := []string{}
 
 	for _, cidr := range cidrs {
-		ip, _, err := net.ParseCIDR(string(cidr))
+		_, subBlock, err := net.ParseCIDR(string(cidr))
 		if err != nil {
-			return matchedCIDRs, err
+			return matchedCIDRs, false, err
 		}
-		if parentBlock.Contains(ip) {
+		// subBlock >= parentBlock, the whole parentBlock should be exlude
+		if containsCidr(subBlock, parentBlock) {
+			return nil, true, err
+		}
+		// exclude the sub block
+		if containsCidr(parentBlock, subBlock) {
 			matchedCIDRs = append(matchedCIDRs, cidr)
 		}
 	}
-	return matchedCIDRs, nil
+	return matchedCIDRs, false, nil
+}
+
+func containsCidr(parent, sub *net.IPNet) bool {
+	parentMask, _ := parent.Mask.Size()
+	subMask, _ := sub.Mask.Size()
+	return parentMask <= subMask && parent.Contains(sub.IP)
 }
