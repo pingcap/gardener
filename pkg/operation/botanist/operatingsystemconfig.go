@@ -364,6 +364,7 @@ func (b *Botanist) applyAndWaitForShootOperatingSystemConfig(ctx context.Context
 
 	var osc *extensionsv1alpha1.OperatingSystemConfig
 
+	// when worker group numbers are high, we need more time to wait OSC ready
 	if err := common.WaitUntilExtensionCRReady(
 		ctx,
 		b.K8sSeedClient.Client(),
@@ -373,7 +374,7 @@ func (b *Botanist) applyAndWaitForShootOperatingSystemConfig(ctx context.Context
 		b.Shoot.SeedNamespace,
 		name,
 		DefaultInterval,
-		30*time.Second,
+		3*time.Minute,
 		func(obj runtime.Object) error {
 			o, ok := obj.(*extensionsv1alpha1.OperatingSystemConfig)
 			if !ok {
