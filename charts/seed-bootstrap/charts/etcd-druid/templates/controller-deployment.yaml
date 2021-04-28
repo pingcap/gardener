@@ -40,11 +40,11 @@ spec:
         {{- end }}
         resources:
           limits:
-            cpu: 1000m
-            memory: 1024Mi
+            cpu: 2000m
+            memory: 2048Mi
           requests:
-            cpu: 500m
-            memory: 512Mi
+            cpu: 800m
+            memory: 800Mi
         ports:
         - containerPort: 9569
         {{- if index .Values.global "imageVectorOverwrites" }}
