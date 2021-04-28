@@ -261,9 +261,10 @@ func (c *Controller) runReconcileShootFlow(o *operation.Operation) *gardencorev1
 			Fn:           flow.TaskFn(botanist.SyncShootCredentialsToGarden).RetryUntilTimeout(defaultInterval, defaultTimeout),
 			Dependencies: flow.NewTaskIDs(deploySecrets, initializeShootClients, deployKubeControllerManager),
 		})
+		// when worker group numbers are high, we need more time to wait OSC ready
 		computeShootOSConfig = g.Add(flow.Task{
 			Name:         "Computing operating system specific configuration for shoot workers",
-			Fn:           flow.TaskFn(botanist.ComputeShootOperatingSystemConfig).RetryUntilTimeout(defaultInterval, defaultTimeout),
+			Fn:           flow.TaskFn(botanist.ComputeShootOperatingSystemConfig).RetryUntilTimeout(defaultInterval, 3*time.Minute),
 			Dependencies: flow.NewTaskIDs(initializeShootClients, waitUntilInfrastructureReady),
 		})
 		deployGardenerResourceManager = g.Add(flow.Task{
