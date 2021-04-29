@@ -10,5 +10,5 @@ spec:
     kind: Deployment
     name: gardener-scheduler
   updatePolicy:
-    updateMode: Initial
+    updateMode: Auto
 {{- end }}

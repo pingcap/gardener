@@ -9,4 +9,4 @@ spec:
     kind: Deployment
     name: kube-state-metrics-seed
   updatePolicy:
-    updateMode: "Initial"
+    updateMode: "Auto"

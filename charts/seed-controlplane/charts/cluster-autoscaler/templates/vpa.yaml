@@ -9,5 +9,5 @@ spec:
     kind: Deployment
     name: cluster-autoscaler
   updatePolicy:
-    updateMode: Initial
+    updateMode: Auto
 
