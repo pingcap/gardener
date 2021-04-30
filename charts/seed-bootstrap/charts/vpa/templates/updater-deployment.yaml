@@ -38,6 +38,7 @@ spec:
         - --eviction-tolerance=1
         - --evict-after-oom-threshold=48h
         - --v=2
+        - --use-admission-controller-status=false
         - --stderrthreshold=info
         resources:
           limits:

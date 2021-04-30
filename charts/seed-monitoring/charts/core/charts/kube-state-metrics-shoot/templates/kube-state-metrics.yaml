@@ -28,7 +28,7 @@ spec:
     kind: Deployment
     name: kube-state-metrics
   updatePolicy:
-    updateMode: "Initial"
+    updateMode: "Auto"
 ---
 apiVersion: {{ include "deploymentversion" . }}
 kind: Deployment
