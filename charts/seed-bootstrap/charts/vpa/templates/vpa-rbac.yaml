@@ -172,6 +172,9 @@ metadata:
   labels:
 {{ toYaml .Values.labels | indent 4 }}
 rules:
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["*"]
 - apiGroups:
   - ""
   resources:
