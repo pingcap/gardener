@@ -445,7 +445,7 @@ func (b *Botanist) generateCoreAddonsChart() (*chartrenderer.RenderedChart, erro
 		return nil, err
 	}
 
-	return b.ChartApplierShoot.Render(filepath.Join(common.ChartPath, "shoot-core", "components"), "shoot-core", metav1.NamespaceSystem, map[string]interface{}{
+	coreAddonConfig := map[string]interface{}{
 		"global":                  global,
 		"cluster-autoscaler":      common.GenerateAddonConfig(nil, b.Shoot.WantsClusterAutoscaler),
 		"coredns":                 coreDNS,
@@ -463,7 +463,12 @@ func (b *Botanist) generateCoreAddonsChart() (*chartrenderer.RenderedChart, erro
 		"podsecuritypolicies":   common.GenerateAddonConfig(podSecurityPolicies, true),
 		"shoot-info":            common.GenerateAddonConfig(shootInfo, true),
 		"vpn-shoot":             common.GenerateAddonConfig(vpnShoot, true),
-	})
+	}
+
+	overrideValues := b.OverrideHelmValues("core")
+	values := utils.MergeMaps(coreAddonConfig, overrideValues)
+
+	return b.ChartApplierShoot.Render(filepath.Join(common.ChartPath, "shoot-core", "components"), "shoot-core", metav1.NamespaceSystem, values)
 }
 
 // generateCoreNamespacesChart renders the gardener-resource-manager configuration for the core namespaces. After that it
