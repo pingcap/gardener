@@ -70,6 +70,7 @@ func (b *Botanist) DeployInfrastructure(ctx context.Context) error {
 			metav1.SetMetaDataAnnotation(&infrastructure.ObjectMeta, v1beta1constants.GardenerOperation, v1beta1constants.GardenerOperationReconcile)
 		}
 
+		infrastructure.Labels["tenant"] = b.Shoot.Info.Labels["tenant"]
 		infrastructure.Spec = extensionsv1alpha1.InfrastructureSpec{
 			DefaultSpec: extensionsv1alpha1.DefaultSpec{
 				Type:           b.Shoot.Info.Spec.Provider.Type,
