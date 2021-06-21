@@ -203,37 +203,6 @@ data:
         replacement: http-metrics
         action: replace
 
-    - job_name: tidb-monitor
-      metrics_path: /federate
-      scrape_timeout: 30s
-      params:
-        'match[]':
-        - '{job=~".*tidb"}'
-        - '{job=~".*tikv"}'
-        - '{job=~".*pd"}'
-        - '{job=~".*importer"}'
-        - '{job=~".*lightning"}'
-        - '{job=~".*tiflash"}'
-        - '{job=~".*tiflash-proxy"}'
-      tls_config:
-        # This is needed because the kubelets' certificates are not are generated
-        # for a specific pod IP
-        insecure_skip_verify: true
-        cert_file: /srv/kubernetes/prometheus-kubelet/prometheus-kubelet.crt
-        key_file: /srv/kubernetes/prometheus-kubelet/prometheus-kubelet.key
-      kubernetes_sd_configs:
-      - role: endpoints
-        api_server: https://kube-apiserver:443
-        tls_config:
-{{ include "prometheus.tls-config.kube-cert-auth" . | indent 10 }}
-      honor_labels: true
-      relabel_configs:
-      - source_labels:
-        - __meta_kubernetes_endpoints_name
-        - __meta_kubernetes_endpoint_port_name
-        regex: db-prometheus;http-prometheus
-        action: keep
-
     - job_name: 'dbaas-reporter'
       tls_config:
         # This is needed because the kubelets' certificates are not are generated
