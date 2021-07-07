@@ -203,13 +203,38 @@ data:
         replacement: http-metrics
         action: replace
 
+    - job_name: tikv-monitor
+      metrics_path: /federate
+      scrape_timeout: 30s
+      scrape_interval: 30s
+      honor_timestamps: true
+      params:
+        'match[]':
+        - '{job=~".*tikv"}'
+      scheme: http
+      tls_config:
+        cert_file: /srv/kubernetes/prometheus-kubelet/prometheus-kubelet.crt
+        key_file: /srv/kubernetes/prometheus-kubelet/prometheus-kubelet.key
+        insecure_skip_verify: true
+      kubernetes_sd_configs:
+      - role: endpoints
+        api_server: https://kube-apiserver:443
+        tls_config:
+{{ include "prometheus.tls-config.kube-cert-auth" . | indent 10 }}
+      honor_labels: true
+      relabel_configs:
+      - source_labels: [ __meta_kubernetes_endpoints_name, __meta_kubernetes_endpoint_port_name ]
+        separator: ;
+        regex: db-prometheus;http-prometheus
+        replacement: $1
+        action: keep
+
     - job_name: tidb-monitor
       metrics_path: /federate
       scrape_timeout: 30s
       params:
         'match[]':
         - '{job=~".*tidb"}'
-        - '{job=~".*tikv"}'
         - '{job=~".*pd"}'
         - '{job=~".*importer"}'
         - '{job=~".*lightning"}'
